@@ -29,7 +29,7 @@ model.theta2 = Param() # starting time of batch 2
 model.alpha = Var(model.S, model.D, model.V, within=Binary) # variable alpha (whether i,j is the starting time of employes v)
 model.beta = Var(model.S, model.D, model.V, within=Binary) # variable beta (whether i,j is the ending time of employees v)
 model.tau = Var(model.S, model.D, model.V, within=Binary) # variable tau (availability employee working at time i,j )
-model.delta = Var(model.S, model.D, within=NonNegativeReals, default=0.0) # variable (amount of delay at time i,j ) 
+model.delta = Var(model.S, model.D, within=NonNegativeReals) # variable (amount of delay at time i,j ) 
 
 
 
@@ -54,15 +54,15 @@ model.const4_rule = Constraint(model.S, model.D, model.V,  rule = const3_rule)
 
 def const5_rule(model,i,j,v):
     return model.tao[i,j,v] <= sum(model.alpha[k,j,v] for k in range(i+1) )
-model.const5_rule = Constratint(model.S, model.D, model.V, rule = const5_rule)
+model.const5_rule = Constraint(model.S, model.D, model.V, rule = const5_rule)
 
 def const6_rule(model,i,j,v):
 	return model.tao[i,j,v] <= 1- sum(model.beta[k,j,v] for k in range(i+1) )
-model.const6_rule = Constratint(model.S, model.D, model.V, rule=const6_rule)
+model.const6_rule = Constraint(model.S, model.D, model.V, rule=const6_rule)
 
 def const7_rule(model,i,j):
 	return sum( model.c[k] * model.w[i,j,k] for k in model.T ) <= sum( model.tao[i,j,k] for k in model.V ) + model.delta[i,j]
-model.const7_rule = Constratint(model.S, model.D, rule = const7_rule)
+model.const7_rule = Constraint(model.S, model.D, rule = const7_rule)
 
 
 # pyomo solve --solver=glpk 02Model_Pyomo.py model2.dat
