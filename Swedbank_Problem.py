@@ -56,7 +56,17 @@ model.const4_rule = Constraint(model.i, model.j, model.v,  rule = const3_rule)
     #^ for j
 #^ for i 
 
+def const5_rule(model,i,j):
+	return model.tao[i,j,v] <= sum(model.alpha[i,j,v] for n in model.k)
+model.const5_rule = Constratint(model.i, model.j, rule = const5_rule)
 
+def const6_rule(model,j,v):
+	return model.tao[i,j,v] <= 1- sum(model.beta[i,j,v] for n in model.k)
+model.const6_rule = Constratint(model.i, model.j, rule=const6_rule)
+
+def const7_rule(model,i,j):
+	return model.c[k] * model.w[j,j,k] <= sum(model.tao[i,j,v] + model.delta[i,j] for n in model.v)
+model.const7_rule = Constratint(model.i, model.j, rule = const7_rule)
 
 
 # pyomo solve --solver=glpk 02Model_Pyomo.py model2.dat
