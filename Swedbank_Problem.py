@@ -2,8 +2,6 @@
 #
 # Imports
 #
-from pyomo.environ import *
-
 model = AbstractModel()
 model.i = Set() # Set of time
 model.j = Set() # Set of day
@@ -22,12 +20,19 @@ model.delta = Var(model.i, model.j, model.v, within=NonNegativeIntegers, default
 
 
 
-
 # Constraints
 
 def const1_rule(model,i,j):
-    return sum(sum(model.tao[i,j,v] for i in model.i) for j in model.j ) == 160- model.theta1
-model.const1_cust = Constraint(model.i, model.j, model.v, rule=one_per_cust_rule)
+    return sum(sum(model.tao[i,j,v] for m in model.i) for n in model.j ) == 160- model.theta1
+model.const1_rule = Constraint(model.i, model.j, rule=const1_rule)
+
+def const2_rule(model,i):
+    return sum(model.alpha[i,j,v] for n in model.i) == 1
+model.const2_rule = Constraint(model.i, rule = const2_rule)
+
+def const3_rule(model,i):
+    return sum(model.beta[i,j,v] for n in model.i) == 1
+model.const3_rule = Constraint(model.i, rule = const3_rule)
 
 
 
