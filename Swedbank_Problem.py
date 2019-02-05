@@ -17,19 +17,19 @@ model.T = Set() # Set of tasks
 model.V = Set() # Set of employees
 
 # Parameters
-model.c = Param(model.k, within= PositiveReals) # duration of tasks of type k 
-model.a = Param(model.i, model.j, within= PositiveReals) # delay proirities
-model.w = Param(model.i, model.j, model.k, within= PositiveReals) # number of tasks (type k) received at time (i,j)
+model.c = Param(model.T, within= PositiveReals) # duration of tasks of type k 
+model.a = Param(model.S, model.D, within= PositiveReals) # delay proirities
+model.w = Param(model.S, model.D, model.T, within= PositiveReals) # number of tasks (type k) received at time (i,j)
 model.n = Param() # number of employees
 model.theta0 = Param() # preparation time 
 model.theta1 = Param() # starting time of batch 1
 model.theta2 = Param() # starting time of batch 2
 
 # Variables
-model.alpha = Var(model.i, model.j, model.v, within=Binary) # variable alpha (whether i,j is the starting time of employes v)
-model.beta = Var(model.i, model.j, model.v, within=Binary) # variable beta (whether i,j is the ending time of employees v)
-model.tau = Var(model.i, model.j, model.v, within=Binary) # variable tau (availability employee working at time i,j )
-model.delta = Var(model.i, model.j, within=NonNegativeReals, default=0.0) # variable (amount of delay at time i,j ) 
+model.alpha = Var(model.S, model.D, model.V, within=Binary) # variable alpha (whether i,j is the starting time of employes v)
+model.beta = Var(model.S, model.D, model.V, within=Binary) # variable beta (whether i,j is the ending time of employees v)
+model.tau = Var(model.S, model.D, model.V, within=Binary) # variable tau (availability employee working at time i,j )
+model.delta = Var(model.S, model.D, within=NonNegativeReals, default=0.0) # variable (amount of delay at time i,j ) 
 
 
 
