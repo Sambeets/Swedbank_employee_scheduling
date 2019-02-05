@@ -24,6 +24,10 @@ model.n = Param() # number of employees
 model.theta0 = Param() # preparation time 
 model.theta1 = Param() # starting time of batch 1
 model.theta2 = Param() # starting time of batch 2
+model.theta3 = Param() # the slot index of the starting time of the lunch break
+model.theta4 = Param() # the slot index of the ending time of the lunch break
+model.theta5 = Param() # the duration of the lunchtime 
+
 
 # Variables
 model.alpha = Var(model.S, model.D, model.V, within=Binary) # variable alpha (whether i,j is the starting time of employes v)
@@ -63,6 +67,10 @@ model.const6_rule = Constraint(model.S, model.D, model.V, rule=const6_rule)
 def const7_rule(model,i,j):
 	return sum( model.c[k] * model.w[i,j,k] for k in model.T ) <= sum( model.tao[i,j,k] for k in model.V ) + model.delta[i,j]
 model.const7_rule = Constraint(model.S, model.D, rule = const7_rule)
+
+def const8_rule(model,j):
+	return sum(sum( model.c[k] * model.w[i,j,k] for k in model.T ) for i in range(model.theta3, model.theta4+1)) <= sum(sum( model.tao[i,j,k] for k in model.V )for i in range(model.theta3, model.theta4+1) + model.delta[i,j]))-model.n*model.theta5
+model.const7_rule = Constraint(model.D, rule = const8_rule)
 
 
 # pyomo solve --solver=glpk 02Model_Pyomo.py model2.dat
