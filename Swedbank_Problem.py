@@ -2,7 +2,6 @@
 #
 # Imports
 #
-# wl_abstract.py: AbstractModel version of warehouse location determination problem
 from pyomo.environ import *
 
 model = AbstractModel()
