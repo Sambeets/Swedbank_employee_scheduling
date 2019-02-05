@@ -18,21 +18,25 @@ model.v = Set() # Set of employees
 
 # Parameters
 model.c = Param(model.k, within= PositiveReals)
+model.a = Param(model.i, model.j, within= PositiveReals)
+model.w = Param(model.i, model.j, model.k, within= PositiveReals)
+model.theta0 = Param()
 model.theta1 = Param()
+model.theta2 = Param()
 
 # Variables
-model.alpha = Var(model.i, model.j, model.v, within=Binary) # parameter alpha
-model.beta = Var(model.i, model.j, model.v, within=Binary) # parameter beta
-model.tao = Var(model.i, model.j, model.v, within=Binary) # parameter beta
-model.delta = Var(model.i, model.j, model.v, within=NonNegativeIntegers, default=0.0) # variable
+model.alpha = Var(model.i, model.j, model.v, within=Binary) # variable alpha
+model.beta = Var(model.i, model.j, model.v, within=Binary) # variable beta
+model.tau = Var(model.i, model.j, model.v, within=Binary) # variable tau
+model.delta = Var(model.i, model.j, within=NonNegativeReals, default=0.0) # variable
 
 
 
 # Constraints
 
-def const1_rule(model,i,j):
-    return sum(sum(model.tao[i,j,v] for m in model.i) for n in model.j ) == 160- model.theta1
-model.const1_rule = Constraint(model.i, model.j, rule=const1_rule)
+def const1_rule(model,i,j,v):
+    return sum(sum(model.tau[i,j,v] for m in model.i) for n in model.j ) == 160- model.theta1
+model.const1_rule = Constraint(model.i, model.j, model.v, rule=const1_rule)
 
 def const2_rule(model,i):
     return sum(model.alpha[i,j,v] for n in model.i) == 1
@@ -41,6 +45,17 @@ model.const2_rule = Constraint(model.i, rule = const2_rule)
 def const3_rule(model,i):
     return sum(model.beta[i,j,v] for n in model.i) == 1
 model.const3_rule = Constraint(model.i, rule = const3_rule)
+
+def const4_rule(model,i,j,v):
+    if i != model.theta_1 or i != model.theta_2:
+        return model.alpha[i,j,v] == 0
+    else:
+        return model.alpha[i,j,v] == 1
+model.const4_rule = Constraint(model.i, model.j, model.v,  rule = const3_rule)
+        #^ for v
+    #^ for j
+#^ for i 
+
 
 
 
