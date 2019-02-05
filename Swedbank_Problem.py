@@ -17,18 +17,19 @@ model.k = Set() # Set of tasks
 model.v = Set() # Set of employees
 
 # Parameters
-model.c = Param(model.k, within= PositiveReals)
-model.a = Param(model.i, model.j, within= PositiveReals)
-model.w = Param(model.i, model.j, model.k, within= PositiveReals)
-model.theta0 = Param()
-model.theta1 = Param()
-model.theta2 = Param()
+model.c = Param(model.k, within= PositiveReals) # duration of tasks of type k 
+model.a = Param(model.i, model.j, within= PositiveReals) # delay proirities
+model.w = Param(model.i, model.j, model.k, within= PositiveReals) # number of tasks (type k) received at time (i,j)
+model.n = Param() # number of employees
+model.theta0 = Param() # preparation time 
+model.theta1 = Param() # starting time of batch 1
+model.theta2 = Param() # starting time of batch 2
 
 # Variables
-model.alpha = Var(model.i, model.j, model.v, within=Binary) # variable alpha
-model.beta = Var(model.i, model.j, model.v, within=Binary) # variable beta
-model.tau = Var(model.i, model.j, model.v, within=Binary) # variable tau
-model.delta = Var(model.i, model.j, within=NonNegativeReals, default=0.0) # variable
+model.alpha = Var(model.i, model.j, model.v, within=Binary) # variable alpha (whether i,j is the starting time of employes v)
+model.beta = Var(model.i, model.j, model.v, within=Binary) # variable beta (whether i,j is the ending time of employees v)
+model.tau = Var(model.i, model.j, model.v, within=Binary) # variable tau (availability employee working at time i,j )
+model.delta = Var(model.i, model.j, within=NonNegativeReals, default=0.0) # variable (amount of delay at time i,j ) 
 
 
 
@@ -52,9 +53,6 @@ def const4_rule(model,i,j,v):
     else:
         return model.alpha[i,j,v] == 1
 model.const4_rule = Constraint(model.i, model.j, model.v,  rule = const3_rule)
-        #^ for v
-    #^ for j
-#^ for i 
 
 def const5_rule(model,i,j):
 	return model.tao[i,j,v] <= sum(model.alpha[i,j,v] for n in model.k)
