@@ -48,10 +48,8 @@ def const3_rule(model,j,v):
 model.const3_rule = Constraint(model.D, model.V, rule = const3_rule)
 
 def const4_rule(model,i,j,v):
-    if i != model.theta_1 or i != model.theta_2:
+    if i != model.theta_1 and i != model.theta_2:
         return model.alpha[i,j,v] == 0
-    else:
-        return model.alpha[i,j,v] == 1
 model.const4_rule = Constraint(model.S, model.D, model.V,  rule = const3_rule)
 
 def const5_rule(model,i,j,v):
