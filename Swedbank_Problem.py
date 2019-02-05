@@ -11,10 +11,10 @@ from pyomo.environ import *
 
 
 model = AbstractModel()
-model.i = Set() # Set of time
-model.j = Set() # Set of day
-model.k = Set() # Set of tasks
-model.v = Set() # Set of employees
+model.S = Set() # Set of time
+model.D = Set() # Set of day
+model.T = Set() # Set of tasks
+model.V = Set() # Set of employees
 
 # Parameters
 model.c = Param(model.k, within= PositiveReals) # duration of tasks of type k 
@@ -35,36 +35,36 @@ model.delta = Var(model.i, model.j, within=NonNegativeReals, default=0.0) # vari
 
 # Constraints
 
-def const1_rule(model,i,j,v):
-    return sum(sum(model.tau[i,j,v] for m in model.i) for n in model.j ) == 160- model.theta1
-model.const1_rule = Constraint(model.i, model.j, model.v, rule=const1_rule)
+def const1_rule(model, v):
+    return sum(sum(model.tau[i,j,v] for i in model.S) for j in model.D ) == 160- model.theta1
+model.const1_rule = Constraint(model.V, rule=const1_rule)
 
-def const2_rule(model,i):
-    return sum(model.alpha[i,j,v] for n in model.i) == 1
-model.const2_rule = Constraint(model.i, rule = const2_rule)
+def const2_rule(model,j,v):
+    return sum(model.alpha[i,j,v] for i in model.S) == 1
+model.const2_rule = Constraint(model.D, model.V, rule = const2_rule)
 
-def const3_rule(model,i):
-    return sum(model.beta[i,j,v] for n in model.i) == 1
-model.const3_rule = Constraint(model.i, rule = const3_rule)
+def const3_rule(model,j,v):
+    return sum(model.beta[i,j,v] for i in model.S) == 1
+model.const3_rule = Constraint(model.D, model.V, rule = const3_rule)
 
 def const4_rule(model,i,j,v):
     if i != model.theta_1 or i != model.theta_2:
         return model.alpha[i,j,v] == 0
     else:
         return model.alpha[i,j,v] == 1
-model.const4_rule = Constraint(model.i, model.j, model.v,  rule = const3_rule)
+model.const4_rule = Constraint(model.S, model.D, model.V,  rule = const3_rule)
 
-def const5_rule(model,i,j):
-	return model.tao[i,j,v] <= sum(model.alpha[i,j,v] for n in model.k)
-model.const5_rule = Constratint(model.i, model.j, rule = const5_rule)
+def const5_rule(model,i,j,v):
+    return model.tao[i,j,v] <= sum(model.alpha[k,j,v] for k in range(i+1) )
+model.const5_rule = Constratint(model.S, model.D, model.V, rule = const5_rule)
 
-def const6_rule(model,j,v):
-	return model.tao[i,j,v] <= 1- sum(model.beta[i,j,v] for n in model.k)
-model.const6_rule = Constratint(model.i, model.j, rule=const6_rule)
+def const6_rule(model,i,j,v):
+	return model.tao[i,j,v] <= 1- sum(model.beta[k,j,v] for k in range(i+1) )
+model.const6_rule = Constratint(model.S, model.D, model.V, rule=const6_rule)
 
 def const7_rule(model,i,j):
-	return model.c[k] * model.w[j,j,k] <= sum(model.tao[i,j,v] + model.delta[i,j] for n in model.v)
-model.const7_rule = Constratint(model.i, model.j, rule = const7_rule)
+	return sum( model.c[k] * model.w[i,j,k] for k in model.T ) <= sum( model.tao[i,j,k] for k in model.V ) + model.delta[i,j]
+model.const7_rule = Constratint(model.S, model.D, rule = const7_rule)
 
 
 # pyomo solve --solver=glpk 02Model_Pyomo.py model2.dat
