@@ -1,0 +1,15 @@
+param c := 1 0.1 2 0.3 3 0.5 4 0.7 5 1;
+param theta0 := 24;
+param theta1 := 0;
+param theta2 := 3;
+param n := 5;
+param Ntask := 5;
+param Ntime := 4;
+param Nday := 3;
+
+
+param a:1 2 3:=
+	1	5 5 5
+	2	5 5 5
+	3	5 5 5
+	4	5 5 5;
