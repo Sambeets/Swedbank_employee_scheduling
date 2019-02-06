@@ -61,7 +61,7 @@ def const4_rule(model,i,j,v):
     if i != model.theta1 and i != model.theta2:
         return model.alpha[i,j,v] == 0
     else:
-        return Constraint.Infeasible
+        return Constraint.Skip #Infeasible
 model.const4 = Constraint(model.S, model.D, model.V,  rule = const4_rule)
 # 
 def const5_rule(model,i,j,v):
@@ -81,23 +81,27 @@ def const7_rule(model,i,j):
 	return sum( model.c[k] * model.w[i,j,k] for k in model.T ) <= sum( model.tau[i,j,k] for k in model.V ) + model.delta[i,j]
 model.const7 = Constraint(model.S, model.D, rule = const7_rule)
 
-'''
-
 def const8_rule(model,j):
-    for i in range(model.theta3, model.theta4):
+    #for i in range(model.theta3, model.theta4):
+    for i in range(1, 6):
         val8 = sum(model.c[k] * model.w[i,j,k] for k in model.T)
-    for j in range(model.theta3, model.theta4):
+    #for j in range(model.theta3, model.theta4):
+    for i in range(6, 11):
         val8_2 = sum( model.tao[i,j,k] for k in model.V)
     
     return val8 <= val8_2 + model.delta[i,j]- model.n * model.theta5
 model.const8 = Constraint(model.D, rule = const8_rule)
+
+'''
+
+
 
 def objective_rule(model):
     return sum(model.a[i,j] * model.delta[i,j] for i in model.S for j in model.D)
 model.objective = Objective(rule=objective_rule, sense=minimize)
 
 opt = SolverFactory('glpk')
-instance = model.create_instance("data.dat")
+instance = model.create_instance("data2.dat") # data.dat contains all data | data2.dat conntains data without w[i,j,k]
 results = opt.solve(instance) # solves and updates instance
 instance.display()
 
