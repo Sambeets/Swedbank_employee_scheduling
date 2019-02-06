@@ -129,7 +129,7 @@ def const9_rule(model,i,j):
     #^ for
     return lhs_sum <= rhs_sum
 
-model.const8 = Constraint(model.S, model.D, rule = const9_rule)
+model.const9 = Constraint(model.S, model.D, rule = const9_rule)
 
 # Objective function: reduces the delays 
 def objective_rule(model):
