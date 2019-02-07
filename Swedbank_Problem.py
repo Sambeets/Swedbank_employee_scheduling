@@ -1,7 +1,82 @@
 from pyomo.environ import *
 import xlwt
 from random import randint
+import scipy.io
 
+
+def prepare_data(input_file, output_file, team, theta, nV):
+    mat = scipy.io.loadmat(input_file)
+    nW = 4 # number of weeks
+    f = open(output_file, 'w+t')
+    if team == 3:
+        nS = 18 # number of time slots per day 
+        nD = 7  # number of days per week
+        nT = 6  # number of types of tasks
+        D = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        # writing the number of time slots per day 
+        f.write("param s := "+str(nS)+";\n")
+
+        # writing the number of days per week   
+        f.write("param d := "+str(nD*nW)+";\n")
+
+        # writing the number of types of tasks
+        f.write("param t := "+str(nT)+";\n")
+
+        # writing the number of employees
+        f.write("param n := "+str(nV)+";\n") 
+
+        # writing the costs of each type  
+        f.write("param c := 1 0.016 2 0.083 3 0.16 4 0.25 5 0.3 6 0.5;\n")
+
+        # writing the
+        f.write("param theta0 := "+str(theta[0])+";\n")
+
+        # writing the
+        f.write("param theta1 := "+str(theta[1])+";\n")
+
+        # writing the
+        f.write("param theta2 := "+str(theta[2])+";\n")
+
+        # writing the
+        f.write("param theta3 := "+str(theta[3])+";\n")
+
+        # writing the
+        f.write("param theta4 := "+str(theta[4])+";\n")
+
+        # writing the
+        f.write("param theta5 := "+str(theta[5])+";\n")
+
+        # writing the
+        f.write("param theta6 := "+str(theta[6])+";\n")
+
+        # writing the
+        f.write("param theta7 := "+str(theta[7])+";\n") 
+
+        # writing the priority delays
+        f.write("param a :=\n")
+        for i in range(nS):
+            f.write("("+str(i+1)+",*) 1 1 2 1 3 1 4 1 5 1 6 1 7 1 8 1 9 1 10 1 11 1 12 1 13 1 14 1 15 1 16 1 17 1 18 1 19 1 20 1 21 1 22 1 23 1 24 1 25 1 26 1 27 1 28 1\n")
+            #^ for
+        #^ for 
+        f.write(";\n")
+        # writing down the w_{i,j,k} tensor
+        f.write("param w :=\n")
+        for i in range(nS):
+            for j in range(nW):
+                slot = (i % 18) + 1
+                day_idx = i + 18*j
+                # Fix the days using the list 
+                f.write("("+str(slot)+","+str(1 + 7*j)+",*) 1 "+str(mat['Monday'][day_idx,0])+" 2 "+str(mat['Monday'][day_idx,1])+" 3 "+str(mat['Monday'][day_idx,2])+" 4 "+str(mat['Monday'][day_idx,3])+" 5 "+str(mat['Monday'][day_idx,4])+" 6 "+str(mat['Monday'][day_idx,5])+"\n" )
+                f.write("("+str(slot)+","+str(2 + 7*j)+",*) 1 "+str(mat['Tuesday'][day_idx,0])+" 2 "+str(mat['Tuesday'][day_idx,1])+" 3 "+str(mat['Tuesday'][day_idx,2])+" 4 "+str(mat['Tuesday'][day_idx,3])+" 5 "+str(mat['Tuesday'][day_idx,4])+" 6 "+str(mat['Tuesday'][day_idx,5])+"\n" )
+                f.write("("+str(slot)+","+str(3 + 7*j)+",*) 1 "+str(mat['Wednesday'][day_idx,0])+" 2 "+str(mat['Wednesday'][day_idx,1])+" 3 "+str(mat['Wednesday'][day_idx,2])+" 4 "+str(mat['Wednesday'][day_idx,3])+" 5 "+str(mat['Wednesday'][day_idx,4])+" 6 "+str(mat['Wednesday'][day_idx,5])+"\n" )
+                f.write("("+str(slot)+","+str(4 + 7*j)+",*) 1 "+str(mat['Thursday'][day_idx,0])+" 2 "+str(mat['Thursday'][day_idx,1])+" 3 "+str(mat['Thursday'][day_idx,2])+" 4 "+str(mat['Thursday'][day_idx,3])+" 5 "+str(mat['Thursday'][day_idx,4])+" 6 "+str(mat['Thursday'][day_idx,5])+"\n" )
+                f.write("("+str(slot)+","+str(5 + 7*j)+",*) 1 "+str(mat['Friday'][day_idx,0])+" 2 "+str(mat['Friday'][day_idx,1])+" 3 "+str(mat['Friday'][day_idx,2])+" 4 "+str(mat['Friday'][day_idx,3])+" 5 "+str(mat['Friday'][day_idx,4])+" 6 "+str(mat['Friday'][day_idx,5])+"\n" )
+                f.write("("+str(slot)+","+str(6 + 7*j)+",*) 1 "+str(mat['Saturday'][day_idx,0])+" 2 "+str(mat['Saturday'][day_idx,1])+" 3 "+str(mat['Saturday'][day_idx,2])+" 4 "+str(mat['Saturday'][day_idx,3])+" 5 "+str(mat['Saturday'][day_idx,4])+" 6 "+str(mat['Saturday'][day_idx,5])+"\n" )
+                f.write("("+str(slot)+","+str(7 + 7*j)+",*) 1 "+str(mat['Sunday'][day_idx,0])+" 2 "+str(mat['Sunday'][day_idx,1])+" 3 "+str(mat['Sunday'][day_idx,2])+" 4 "+str(mat['Sunday'][day_idx,3])+" 5 "+str(mat['Sunday'][day_idx,4])+" 6 "+str(mat['Sunday'][day_idx,5])+"\n" )
+            #^ for
+        #^ for
+        f.write(";")
+#^ prepare_data
 
 def create_model(model):
     model.s = Param() # number of time slots 
@@ -41,18 +116,18 @@ def create_model(model):
 
     # Employees maximum working hours 
     def const0_rule(model, v):
-        return sum(model.tau[i,j,v] for i in model.S for j in model.D ) <= model.theta0 - model.theta2
+        return sum(i*( model.beta[i,j,v] - model.alpha[i,j,v] )  for i in model.S for j in model.D) + len(model.D) <= model.theta0 - model.theta2
     model.const0 = Constraint(model.V, rule=const0_rule)
 
     # Employees minimum working hours 
     def const1_rule(model, v):
-        return sum(model.tau[i,j,v] for i in model.S for j in model.D ) >= model.theta1 - model.theta2
+        return sum( i*( model.beta[i,j,v] - model.alpha[i,j,v] ) for i in model.S for j in model.D) + len(model.D) >= model.theta1 - model.theta2
     model.const1 = Constraint(model.V, rule=const1_rule)
 
     # 
 
     # Starting time of each Employee
-    def const2_rule(model,j,v):
+    def const2_rule(model, j, v):
         return sum(model.alpha[i,j,v] for i in model.S) == 1
     model.const2 = Constraint(model.D, model.V, rule = const2_rule)
     # 
@@ -64,39 +139,48 @@ def create_model(model):
 
     #
 
+    # Start time is less than End time
+    # def const4_rule(model,i,j,v):
+    #     if i <= model.theta3 or i <= model.theta4:
+    #         return model.beta[i,j,v] == 0
+    #     else:
+    #         return model.beta[i,j,v] >= 0
+    def const4_rule(model,j,v):
+        return sum ( i*( model.beta[i,j,v] - model.alpha[i,j,v]) for i in model.S) >= -1
+
+    model.const4 = Constraint(model.D, model.V, rule = const4_rule)
+
     # Employees arrive in different batches
-    def const4_rule(model,i,j,v):
+    def const5_rule(model,i,j,v):
         if i != model.theta3 and i != model.theta4:
             return model.alpha[i,j,v] == 0
-        if i == model.theta3:
-            return model.alpha[i,j,v] == randint(0,1)
-        if i == model.theta4:
-            return model.alpha[i,j,v] >= 0 
-    model.const4 = Constraint(model.S, model.D, model.V,  rule = const4_rule)
+        else:
+            return model.alpha[i,j,v] >=0
+    model.const5 = Constraint(model.S, model.D, model.V,  rule = const5_rule)
     # 
 
     # Tasks are not assigned to Employees who didn't arrive 
-    def const5_rule(model,i,j,v):
+    def const6_rule(model,i,j,v):
         val5 = sum(model.alpha[k,j,v] for k in range(1,i+1) )
         return model.tau[i,j,v] <= val5
-    model.const5 = Constraint(model.S, model.D, model.V, rule = const5_rule)
+    model.const6 = Constraint(model.S, model.D, model.V, rule = const6_rule)
     # 
 
     # Tasks are not assigned to Employees after leaving work
-    def const6_rule(model,i,j,v):
+    def const7_rule(model,i,j,v):
         val6 = 1 - sum(model.beta[k,j,v] for k in range(1,i) )
         return model.tau[i,j,v] <= val6
-    model.const6 = Constraint(model.S, model.D, model.V, rule=const6_rule)
+    model.const7 = Constraint(model.S, model.D, model.V, rule=const7_rule)
     # 
 
     # Counts the delays due to working load 
-    def const7_rule(model,i,j):
+    def const8_rule(model,i,j):
         return sum( model.c[k] * model.w[i,j,k] for k in model.T ) <= sum( model.tau[i,j,k] for k in model.V ) + model.delta[i,j]
-    model.const7 = Constraint(model.S, model.D, rule = const7_rule)
+    model.const8 = Constraint(model.S, model.D, rule = const8_rule)
 
 
     # Takes Lunch time into consideration
-    def const8_rule(model,j):
+    def const9_rule(model,j):
         lhs_sum = 0
         rhs_sum = 0
         for i in model.S:
@@ -105,12 +189,12 @@ def create_model(model):
                 rhs_sum += sum( model.tau[i,j,k] for k in model.V)
             #^ if
         #^ for
-        return lhs_sum <= rhs_sum + model.delta[i,j]- model.n * model.theta7
-    model.const8 = Constraint(model.D, rule = const8_rule)
-    #
+        return lhs_sum <= rhs_sum + model.delta[i,j]- model.theta7*model.n # Fix this!!!
+    model.const9 = Constraint(model.D, rule = const9_rule)
+    
 
     # Extra wroking time 
-    def const9_rule(model,i,j):
+    def const10_rule(model,i,j):
         lhs_sum = 0
         rhs_sum = 0
         for it in model.S:
@@ -123,7 +207,7 @@ def create_model(model):
         #^ for
         return lhs_sum <= rhs_sum
 
-    model.const9 = Constraint(model.S, model.D, rule = const9_rule)
+    model.const10 = Constraint(model.S, model.D, rule = const10_rule)
 
     # Objective function: reduces the delays 
     def objective_rule(model):
@@ -132,9 +216,9 @@ def create_model(model):
 
 #^ create model()
 
-def solve(model):
-    opt = SolverFactory('gurobi')
-    instance = model.create_instance("data2.dat") # data.dat contains all data | data2.dat conntains data without w[i,j,k]
+def solve(model, solver, data_file):
+    opt = SolverFactory(solver)
+    instance = model.create_instance(data_file)
     results = opt.solve(instance) # solves and updates instance
     return instance, results
 #^ solve()
@@ -180,7 +264,7 @@ def write_to_excel(file_name, instance, var_alpha, var_beta, var_tau, var_delta)
                          num_format_str='#,##0.00')
     # style1 = xlwt.easyxf(num_format_str='D-MMM-YY')
     wb = xlwt.Workbook()
-    ws = wb.add_sheet('A Test Sheet')
+    ws = wb.add_sheet('Time Table')
 
     ws.write(0, 0, 'Employee', style0)
     ws.write(0, 1, 'Day', style0)
@@ -208,19 +292,38 @@ def write_to_excel(file_name, instance, var_alpha, var_beta, var_tau, var_delta)
 #===========
 # Run It
 #===========
+# WRap it in a function
+def do_it(input_file, solver, team, params, number_employees):
+    model = AbstractModel("Swedbank Scheduling Tartu Uni 2019")
+    create_model(model)
+    prepare_data('MonthMatrix_P.mat', input_file+'.dat', team , params, number_employees)
+    instance, results = solve(model,'gurobi', input_file+'.dat')
+
+    instance.load(results)
+    results.write()
+    # instance.display()
+    var_alpha, var_beta, var_tau, var_delta = retrieve_results(instance, results)
+
+    write_to_excel('example.xls', instance, var_alpha, var_beta, var_tau, var_delta)
+#^ do_it()
+
+input_file = 'MonthMatrix_P.mat'
+solver = 'gurobi'
+team = 3
+params = [160, 80, 12, 1, 6, 4, 7, 0.5]
+number_employees = 100
+
+# do_it(input_file, solver, team, params, number_employees)
+
 
 model = AbstractModel("Swedbank Scheduling Tartu Uni 2019")
 create_model(model)
-instance, results = solve(model)
+#  prepare_data('MonthMatrix_P.mat', 'test_output.dat', 3 , [160, 80, 12, 1, 6, 4, 7, 0.5], 100)
+instance, results = solve(model,'gurobi','test_output.dat')
 
 instance.load(results)
 results.write()
 # instance.display()
 var_alpha, var_beta, var_tau, var_delta = retrieve_results(instance, results)
-write_to_excel('example.xls', instance, var_alpha, var_beta, var_tau, var_delta)
 
-# 
-# 
-# # pyomo solve --solver=glpk Swedbank_Problem.py data2.dat
-# 
-# =============================================================================
+write_to_excel('example.xls', instance, var_alpha, var_beta, var_tau, var_delta)
