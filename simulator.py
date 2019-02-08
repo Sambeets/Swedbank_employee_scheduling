@@ -86,7 +86,7 @@ taskindex = 0
 lunchindex = 0
 taskarray = []  # sorted list of task object
 
-i = 0
+taskarray.sort(key=lambda task: task.comingTime, reverse=False)
 
 
 
@@ -95,6 +95,7 @@ systemTime = 0
 while (taskindex < len(taskarray)) or (lunchindex < len(luncharray)):
     minserverfreeindex = -1
     minserverfreevalue = 25
+    i = 0
     while i < len(employeearray):
         if (systemTime < employeearray[i].freeTime) and (minserverfreevalue > employeearray[i].freeTime):
             minserverfreeindex = i
