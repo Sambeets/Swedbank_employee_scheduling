@@ -5,6 +5,17 @@ import scipy.io
 
 
 def prepare_data(input_file, output_file, team, theta, nV):
+    '''Converts Matlab data files to  pyomo command data
+    Args:
+        input_file: str - name of the matlab file
+        outputfile: str - name of the created pyomo file
+        team: int - type of the team (currently 1,2,3)
+        theta: list - list of parameters explained in documents
+        nV: int - number of employees
+    
+    Returns:
+        none
+'''
     nT = 6  # number of types of tasks
     nW = 4 # number of weeks
     if team == 3:
@@ -16,7 +27,9 @@ def prepare_data(input_file, output_file, team, theta, nV):
         nS = 10
         nD = 5
         core_prepare_data(input_file, output_file, team, theta, nV, nS, nD, nT, nW)
-    #^if 
+    #^if
+    return 0
+#^ prepare_data()
 def core_prepare_data(input_file, output_file, team, theta, nV, nS, nD, nT, nW):
     mat = scipy.io.loadmat(input_file)
     f = open(output_file, 'w+t')
@@ -308,7 +321,6 @@ def write_to_excel(file_name, instance, var_alpha, var_beta, var_tau, var_delta)
 #===========
 # Run It
 #===========
-# WRap it in a function
 def do_it(input_file, solver, team, params, number_employees):
     model = AbstractModel("Swedbank Scheduling Tartu Uni 2019")
     print("Starts to create the model")
