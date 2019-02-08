@@ -1,21 +1,22 @@
 import math
+import pandas
+import xlrd
 
-numSlut = 8
-begintimework = 8
-endtimework = 16
+numSlut = 18
+begintimework = 7
+endtimework = 23
 lunchDuration = .25
 beginLunch = 11
 endLunch = 2
-A = [.1, .3, .5, .7, 1]
+A = [.1, .2, .3, .5, .8, 1]
 output = open("outputsim.txt", 'a')
 
 class task:
-    def __init__(self, day, typeTask, slot, comingTime, startingTime):
+    def __init__(self, day, typeTask, slot, comingTime):
         self.day = day
         self.typeTask = typeTask
         self.slot = slot
         self.comingTime = comingTime
-        self.startingTime = startingTime
 
     def setTime(self, t):
         self.startingTime = t
@@ -23,12 +24,12 @@ class task:
 
     def print(self, file):
 
-        file.write(self.day)
-        file.write(self.slot)
-        file.write(self.typeTask)
-        file.write(self.comingTime)
-        file.write(self.startingTime)
-        file.write(self.finishingTime)
+        file.write(str(self.day)+ "  ")
+        file.write(str(self.slot)+"  ")
+        file.write(str(self.typeTask)+"  ")
+        file.write(str(self.comingTime)+"  ")
+        file.write(str(self.startingTime)+" ")
+        file.write(str(self.finishingTime)+ "  \n")
         
 
 class employee:
@@ -38,7 +39,7 @@ class employee:
         self.freeTime = start
         self.end = end
 
-    def setFreeTime(self, t):
+    def setFreeTime1(self, t):
         self.freeTime = t
 
     def setFreeTime(self):
@@ -61,6 +62,25 @@ class lunchEvent:
         self.employeeNumber = employeeNumber
         self.lunchTime = lunchTime
 
+taskarray = []  # sorted list of task object
+
+#def __init__(self, day, typeTask, slot, comingTime):
+
+day = 1
+
+df = pandas.read_excel('Workflow.xlsx', sheet_name='Team 3')
+k = 0;
+for i in range(numSlut):
+    idata = df.iloc[i,8:14]
+    for j in range(6):
+        ll = idata.values[j]
+        for ttt in range(ll):
+            x = task(day, j, i, i + begintimework + k/4.0)
+            k = (k + 1) % 4
+            taskarray.append(x)
+            print(x.slot, x.comingTime)
+taskarray.sort(key=lambda task: task.comingTime, reverse=False)
+
 
 f = open ( 'dataSimSchedule.txt' , 'r')
 data = [[int(num) for num in line.split()] for line in f ]
@@ -69,7 +89,6 @@ f.close()
 employeearray = []  # list of employee object
 luncharray = []  # list of lunchEvent object
 
-day = 1
 dataindex = 0
 t = 0
 while data[dataindex][0] == day:
@@ -82,15 +101,14 @@ while data[dataindex][0] == day:
     dataindex += 1
 
 beginLunch - begintimework +1
-taskindex = 0
 lunchindex = 0
-taskarray = []  # sorted list of task object
 
-taskarray.sort(key=lambda task: task.comingTime, reverse=False)
 
 
 
 systemTime = 0
+taskindex = 0
+
 
 while (taskindex < len(taskarray)) or (lunchindex < len(luncharray)):
     minserverfreeindex = -1
@@ -109,13 +127,16 @@ while (taskindex < len(taskarray)) or (lunchindex < len(luncharray)):
                 employee[l.employeeNumber].setFreeTime()
                 luncharray.remove(l)
 
-    while taskarray[taskindex].startingTime <= systemTime:
+    while (taskarray[taskindex].comingTime <= systemTime):
         mn, idx = min((employeearray[j].freeTime, j) for j in range(len(employeearray)))
         taskarray[taskindex].setTime(systemTime)
-        taskarray[taskindex].print()
-        employeearray[idx].setFreeTime(taskarray[taskindex].finishingTime)
+        taskarray[taskindex].print(output)
+        h = taskarray[taskindex].finishingTime
+        employeearray[idx].setFreeTime1(h)
         if employeearray[idx].checkAvailablity() == 0 and employeearray[idx].end < endtimework:
             employeearray[idx].freeTime = 25
         taskindex += 1
+        if ((taskindex >= len(taskarray))):
+            break
 
 output.close()
