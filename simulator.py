@@ -7,7 +7,7 @@ lunchDuration = .25
 beginLunch = 11
 endLunch = 2
 A = [.1, .3, .5, .7, 1]
-
+output = open("outputsim.txt", 'a')
 
 class task:
     def __init__(self, day, typeTask, slot, comingTime, startingTime):
@@ -21,9 +21,15 @@ class task:
         self.startingTime = t
         self.finishingTime = A[self.typeTask] + self.startingTime
 
-    def print(self):
-        print(self.day)
+    def print(self, file):
 
+        file.write(self.day)
+        file.write(self.slot)
+        file.write(self.typeTask)
+        file.write(self.comingTime)
+        file.write(self.startingTime)
+        file.write(self.finishingTime)
+        
 
 class employee:
     def __init__(self, number, start, end):
@@ -56,7 +62,7 @@ class lunchEvent:
         self.lunchTime = lunchTime
 
 
-f = open ( 'dataSimSchadule.txt' , 'r')
+f = open ( 'dataSimSchedule.txt' , 'r')
 data = [[int(num) for num in line.split()] for line in f ]
 f.close()
 #print(data)
@@ -110,3 +116,5 @@ while (taskindex < len(taskarray)) or (lunchindex < len(luncharray)):
         if employeearray[idx].checkAvailablity() == 0 and employeearray[idx].end < endtimework:
             employeearray[idx].freeTime = 25
         taskindex += 1
+
+output.close()
