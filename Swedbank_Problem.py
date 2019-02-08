@@ -5,78 +5,94 @@ import scipy.io
 
 
 def prepare_data(input_file, output_file, team, theta, nV):
-    mat = scipy.io.loadmat(input_file)
+    nT = 6  # number of types of tasks
     nW = 4 # number of weeks
-    f = open(output_file, 'w+t')
     if team == 3:
         nS = 18 # number of time slots per day 
         nD = 7  # number of days per week
-        nT = 6  # number of types of tasks
-        D = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        # writing the number of time slots per day 
-        f.write("param s := "+str(nS)+";\n")
+        core_prepare_data(input_file, output_file, team, theta, nV, nS, nD, nT, nW)
+    #^ if
+    if team ==1 or team == 2:
+        nS = 10
+        nD = 5
+        core_prepare_data(input_file, output_file, team, theta, nV, nS, nD, nT, nW)
+    #^if 
+def core_prepare_data(input_file, output_file, team, theta, nV, nS, nD, nT, nW):
+    mat = scipy.io.loadmat(input_file)
+    f = open(output_file, 'w+t')
+    D = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    # writing the number of time slots per day 
+    f.write("param s := "+str(nS)+";\n")
 
-        # writing the number of days per week   
-        f.write("param d := "+str(nD*nW)+";\n")
+    # writing the number of days per week   
+    f.write("param d := "+str(nD*nW)+";\n")
+    
+    # writing the number of types of tasks
+    f.write("param t := "+str(nT)+";\n")
 
-        # writing the number of types of tasks
-        f.write("param t := "+str(nT)+";\n")
+    # writing the number of employees
+    f.write("param n := "+str(nV)+";\n") 
 
-        # writing the number of employees
-        f.write("param n := "+str(nV)+";\n") 
+    # writing the costs of each type  
+    f.write("param c := 1 0.016 2 0.083 3 0.16 4 0.25 5 0.3 6 0.5;\n")
 
-        # writing the costs of each type  
-        f.write("param c := 1 0.016 2 0.083 3 0.16 4 0.25 5 0.3 6 0.5;\n")
+    # writing the
+    f.write("param theta0 := "+str(theta[0])+";\n")
 
-        # writing the
-        f.write("param theta0 := "+str(theta[0])+";\n")
+    # writing the
+    f.write("param theta1 := "+str(theta[1])+";\n")
+    
+    # writing the
+    f.write("param theta2 := "+str(theta[2])+";\n")
 
-        # writing the
-        f.write("param theta1 := "+str(theta[1])+";\n")
+    # writing the
+    f.write("param theta3 := "+str(theta[3])+";\n")
+        
+    # writing the
+    f.write("param theta4 := "+str(theta[4])+";\n")
+        
+    # writing the
+    f.write("param theta5 := "+str(theta[5])+";\n")
 
-        # writing the
-        f.write("param theta2 := "+str(theta[2])+";\n")
+    # writing the
+    f.write("param theta6 := "+str(theta[6])+";\n")
 
-        # writing the
-        f.write("param theta3 := "+str(theta[3])+";\n")
+    # writing the
+    f.write("param theta7 := "+str(theta[7])+";\n") 
 
-        # writing the
-        f.write("param theta4 := "+str(theta[4])+";\n")
-
-        # writing the
-        f.write("param theta5 := "+str(theta[5])+";\n")
-
-        # writing the
-        f.write("param theta6 := "+str(theta[6])+";\n")
-
-        # writing the
-        f.write("param theta7 := "+str(theta[7])+";\n") 
-
-        # writing the priority delays
-        f.write("param a :=\n")
-        for i in range(nS):
+    # writing the priority delays
+    f.write("param a :=\n")
+    for i in range(nS):
+        if team == 3:
             f.write("("+str(i+1)+",*) 1 1 2 1 3 1 4 1 5 1 6 1 7 1 8 1 9 1 10 1 11 1 12 1 13 1 14 1 15 1 16 1 17 1 18 1 19 1 20 1 21 1 22 1 23 1 24 1 25 1 26 1 27 1 28 1\n")
-            #^ for
-        #^ for 
-        f.write(";\n")
-        # writing down the w_{i,j,k} tensor
-        f.write("param w :=\n")
-        for i in range(nS):
-            for j in range(nW):
-                slot = (i % 18) + 1
-                day_idx = i + 18*j
-                # Fix the days using the list 
-                f.write("("+str(slot)+","+str(1 + 7*j)+",*) 1 "+str(mat['Monday'][day_idx,0])+" 2 "+str(mat['Monday'][day_idx,1])+" 3 "+str(mat['Monday'][day_idx,2])+" 4 "+str(mat['Monday'][day_idx,3])+" 5 "+str(mat['Monday'][day_idx,4])+" 6 "+str(mat['Monday'][day_idx,5])+"\n" )
-                f.write("("+str(slot)+","+str(2 + 7*j)+",*) 1 "+str(mat['Tuesday'][day_idx,0])+" 2 "+str(mat['Tuesday'][day_idx,1])+" 3 "+str(mat['Tuesday'][day_idx,2])+" 4 "+str(mat['Tuesday'][day_idx,3])+" 5 "+str(mat['Tuesday'][day_idx,4])+" 6 "+str(mat['Tuesday'][day_idx,5])+"\n" )
-                f.write("("+str(slot)+","+str(3 + 7*j)+",*) 1 "+str(mat['Wednesday'][day_idx,0])+" 2 "+str(mat['Wednesday'][day_idx,1])+" 3 "+str(mat['Wednesday'][day_idx,2])+" 4 "+str(mat['Wednesday'][day_idx,3])+" 5 "+str(mat['Wednesday'][day_idx,4])+" 6 "+str(mat['Wednesday'][day_idx,5])+"\n" )
-                f.write("("+str(slot)+","+str(4 + 7*j)+",*) 1 "+str(mat['Thursday'][day_idx,0])+" 2 "+str(mat['Thursday'][day_idx,1])+" 3 "+str(mat['Thursday'][day_idx,2])+" 4 "+str(mat['Thursday'][day_idx,3])+" 5 "+str(mat['Thursday'][day_idx,4])+" 6 "+str(mat['Thursday'][day_idx,5])+"\n" )
-                f.write("("+str(slot)+","+str(5 + 7*j)+",*) 1 "+str(mat['Friday'][day_idx,0])+" 2 "+str(mat['Friday'][day_idx,1])+" 3 "+str(mat['Friday'][day_idx,2])+" 4 "+str(mat['Friday'][day_idx,3])+" 5 "+str(mat['Friday'][day_idx,4])+" 6 "+str(mat['Friday'][day_idx,5])+"\n" )
-                f.write("("+str(slot)+","+str(6 + 7*j)+",*) 1 "+str(mat['Saturday'][day_idx,0])+" 2 "+str(mat['Saturday'][day_idx,1])+" 3 "+str(mat['Saturday'][day_idx,2])+" 4 "+str(mat['Saturday'][day_idx,3])+" 5 "+str(mat['Saturday'][day_idx,4])+" 6 "+str(mat['Saturday'][day_idx,5])+"\n" )
-                f.write("("+str(slot)+","+str(7 + 7*j)+",*) 1 "+str(mat['Sunday'][day_idx,0])+" 2 "+str(mat['Sunday'][day_idx,1])+" 3 "+str(mat['Sunday'][day_idx,2])+" 4 "+str(mat['Sunday'][day_idx,3])+" 5 "+str(mat['Sunday'][day_idx,4])+" 6 "+str(mat['Sunday'][day_idx,5])+"\n" )
-            #^ for
+        #^ if 
+        if team == 1 or team == 2:
+            f.write("("+str(i+1)+",*) 1 1 2 1 3 1 4 1 5 1 6 1 7 1 8 1 9 1 10 1 11 1 12 1 13 1 14 1 15 1 16 1 17 1 18 1 19 1 20 1\n")
+    #^ for
+    f.write(";\n")
+    # writing down the w_{i,j,k} tensor
+    f.write("param w :=\n")
+    for i in range(nS):
+        for j in range(nW):
+            slot = (i % 18) + 1
+            day_idx = i + nS*j
+            # Fix the days using the list
+            f.write("("+str(slot)+","+str(1 + nD*j)+",*) 1 "+str(mat['Monday'][day_idx,0])+" 2 "+str(mat['Monday'][day_idx,1])+" 3 "+str(mat['Monday'][day_idx,2])+" 4 "+str(mat['Monday'][day_idx,3])+" 5 "+str(mat['Monday'][day_idx,4])+" 6 "+str(mat['Monday'][day_idx,5])+"\n" )
+            f.write("("+str(slot)+","+str(2 + nD*j)+",*) 1 "+str(mat['Tuesday'][day_idx,0])+" 2 "+str(mat['Tuesday'][day_idx,1])+" 3 "+str(mat['Tuesday'][day_idx,2])+" 4 "+str(mat['Tuesday'][day_idx,3])+" 5 "+str(mat['Tuesday'][day_idx,4])+" 6 "+str(mat['Tuesday'][day_idx,5])+"\n" )
+            f.write("("+str(slot)+","+str(3 + nD*j)+",*) 1 "+str(mat['Wednesday'][day_idx,0])+" 2 "+str(mat['Wednesday'][day_idx,1])+" 3 "+str(mat['Wednesday'][day_idx,2])+" 4 "+str(mat['Wednesday'][day_idx,3])+" 5 "+str(mat['Wednesday'][day_idx,4])+" 6 "+str(mat['Wednesday'][day_idx,5])+"\n" )
+            f.write("("+str(slot)+","+str(4 + nD*j)+",*) 1 "+str(mat['Thursday'][day_idx,0])+" 2 "+str(mat['Thursday'][day_idx,1])+" 3 "+str(mat['Thursday'][day_idx,2])+" 4 "+str(mat['Thursday'][day_idx,3])+" 5 "+str(mat['Thursday'][day_idx,4])+" 6 "+str(mat['Thursday'][day_idx,5])+"\n" )
+            f.write("("+str(slot)+","+str(5 + nD*j)+",*) 1 "+str(mat['Friday'][day_idx,0])+" 2 "+str(mat['Friday'][day_idx,1])+" 3 "+str(mat['Friday'][day_idx,2])+" 4 "+str(mat['Friday'][day_idx,3])+" 5 "+str(mat['Friday'][day_idx,4])+" 6 "+str(mat['Friday'][day_idx,5])+"\n" )
+            if team == 3:
+                f.write("("+str(slot)+","+str(6 + nD*j)+",*) 1 "+str(mat['Saturday'][day_idx,0])+" 2 "+str(mat['Saturday'][day_idx,1])+" 3 "+str(mat['Saturday'][day_idx,2])+" 4 "+str(mat['Saturday'][day_idx,3])+" 5 "+str(mat['Saturday'][day_idx,4])+" 6 "+str(mat['Saturday'][day_idx,5])+"\n" )
+            if team == 3:
+                f.write("("+str(slot)+","+str(6 + nD*j)+",*) 1 "+str(mat['Saturday'][day_idx_s,0])+" 2 "+str(mat['Saturday'][day_idx_s,1])+" 3 "+str(mat['Saturday'][day_idx_s,2])+" 4 "+str(mat['Saturday'][day_idx_s,3])+" 5 "+str(mat['Saturday'][day_idx_s,4])+" 6 "+str(mat['Saturday'][day_idx_s,5])+"\n" )
+
+                f.write("("+str(slot)+","+str(7 + nD*j)+",*) 1 "+str(mat['Sunday'][day_idx,0])+" 2 "+str(mat['Sunday'][day_idx,1])+" 3 "+str(mat['Sunday'][day_idx,2])+" 4 "+str(mat['Sunday'][day_idx,3])+" 5 "+str(mat['Sunday'][day_idx,4])+" 6 "+str(mat['Sunday'][day_idx,5])+"\n" )
         #^ for
-        f.write(";")
-#^ prepare_data
+    #^ for
+    f.write(";")
+    return 0 
+#^ core_prepare_data()
 
 def create_model(model):
     model.s = Param() # number of time slots 
@@ -295,35 +311,30 @@ def write_to_excel(file_name, instance, var_alpha, var_beta, var_tau, var_delta)
 # WRap it in a function
 def do_it(input_file, solver, team, params, number_employees):
     model = AbstractModel("Swedbank Scheduling Tartu Uni 2019")
+    print("Starts to create the model")
     create_model(model)
-    prepare_data('MonthMatrix_P.mat', input_file+'.dat', team , params, number_employees)
+    print("Finished creating the model")
+    print("Starts to read input data")
+    prepare_data(input_file+".mat", input_file+'.dat', team , params, number_employees)
+    print("Finished reading the input data")
+    print(" Starts to solve the model")
     instance, results = solve(model,'gurobi', input_file+'.dat')
-
+    print(" Finished solving the model")
     instance.load(results)
     results.write()
     # instance.display()
-    var_alpha, var_beta, var_tau, var_delta = retrieve_results(instance, results)
+    if results.solver.Message != 'Model was proven to be infeasible':
+        print("Solution Found!")
+        var_alpha, var_beta, var_tau, var_delta = retrieve_results(instance, results)
+        write_to_excel(input_file+'_'+str(number_employees)+'.xls', instance, var_alpha, var_beta, var_tau, var_delta)
+    else:
+        print("Sorry no solution, please modify the parameters")
+    #^ do_it()
 
-    write_to_excel('example.xls', instance, var_alpha, var_beta, var_tau, var_delta)
-#^ do_it()
-
-input_file = 'MonthMatrix_P.mat'
-solver = 'gurobi'
-team = 3
-params = [160, 80, 12, 1, 6, 4, 7, 0.5]
-number_employees = 100
-
+# input_file = 'MonthMatrix_P_S1'
+# solver = 'gurobi'
+# team = 1
+# params = [160, 80, 12, 1, 6, 4, 7, 0.5]
+# number_employees = 10
 # do_it(input_file, solver, team, params, number_employees)
 
-
-model = AbstractModel("Swedbank Scheduling Tartu Uni 2019")
-create_model(model)
-#  prepare_data('MonthMatrix_P.mat', 'test_output.dat', 3 , [160, 80, 12, 1, 6, 4, 7, 0.5], 100)
-instance, results = solve(model,'gurobi','test_output.dat')
-
-instance.load(results)
-results.write()
-# instance.display()
-var_alpha, var_beta, var_tau, var_delta = retrieve_results(instance, results)
-
-write_to_excel('example.xls', instance, var_alpha, var_beta, var_tau, var_delta)
